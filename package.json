@@ -30,8 +30,8 @@
     }
   },
   "scripts": {
-    "clean": "rm -rf dist/* deno/dist/*",
-    "build": "yarn run clean && tsup src/index.ts  --sourcemap --dts --format esm,cjs",
+    "clean": "del /s /q dist\\* deno\\dist\\*",
+    "build": "pnpm run clean && tsup src/index.ts  --sourcemap --dts --format esm,cjs",
     "prepublishOnly": "pnpm run build",
     "test": "vitest"
   },
