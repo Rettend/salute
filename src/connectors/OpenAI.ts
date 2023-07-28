@@ -7,6 +7,12 @@ import {
 } from "openai";
 import { createLLM } from ".";
 
+let openAIKey = '';
+
+if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
+  openAIKey = process.env.OPENAI_KEY;
+}
+
 export async function* parseOpenAIStream(
   stream: NodeJS.ReadableStream
 ): AsyncGenerator<[number, string], void> {
@@ -36,7 +42,7 @@ export const createOpenAICompletion = (
   openAIConfig?: ConfigurationParameters
 ) => {
   const configuration = new Configuration({
-    apiKey: process.env.OPENAI_KEY || openAIConfig?.apiKey,
+    apiKey: openAIKey || openAIConfig?.apiKey,
     ...openAIConfig,
   });
 
@@ -77,7 +83,7 @@ export const createOpenAIChatCompletion = (
   openAIConfig?: ConfigurationParameters
 ) => {
   const configuration = new Configuration({
-    apiKey: process.env.OPENAI_KEY || openAIConfig?.apiKey,
+    apiKey: openAIKey || openAIConfig?.apiKey,
     ...openAIConfig,
   });
 
@@ -111,12 +117,6 @@ export const createOpenAIChatCompletion = (
     }
   }, true);
 };
-
-let openAIKey = '';
-
-if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
-  openAIKey = process.env.OPENAI_KEY;
-}
 
 export const gpt3 = createOpenAIChatCompletion(
   { model: "gpt-3.5-turbo" },
