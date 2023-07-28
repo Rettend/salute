@@ -41,6 +41,7 @@ export const createOpenAICompletion = (
   options: CreateCompletionRequest,
   openAIConfig?: ConfigurationParameters
 ) => {
+  console.log('apiKey', openAIConfig?.apiKey);
   const configuration = new Configuration({
     apiKey: openAIKey || openAIConfig?.apiKey,
     ...openAIConfig,
@@ -112,6 +113,7 @@ export const createOpenAIChatCompletion = (
         yield* parseOpenAIStream(stream);
       }
     } catch (e: any) {
+      console.log(e);
       console.log(e.response);
       throw e.response;
     }
