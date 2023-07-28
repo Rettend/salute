@@ -41,6 +41,7 @@ export const createOpenAICompletion = (
   options: CreateCompletionRequest,
   openAIConfig?: ConfigurationParameters
 ) => {
+  console.log('config', openAIConfig);
   console.log('apiKey', openAIConfig?.apiKey);
   const configuration = new Configuration({
     apiKey: openAIKey || openAIConfig?.apiKey,
