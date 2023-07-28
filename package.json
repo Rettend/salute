@@ -32,7 +32,7 @@
   "scripts": {
     "clean": "rm -rf dist/* deno/dist/*",
     "build": "yarn run clean && tsup src/index.ts  --sourcemap --dts --format esm,cjs",
-    "prepublishOnly": "yarn run build",
+    "prepublishOnly": "pnpm run build",
     "test": "vitest"
   },
   "dependencies": {
