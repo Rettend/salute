@@ -79,7 +79,7 @@ export const createOpenAICompletion = (
 };
 
 export const createOpenAIChatCompletion = (
-  options: Omit<CreateChatCompletionRequest, "messages" | "stream" | "stop">,
+  options: Omit<CreateChatCompletionRequest, "messages" | "stream">,
   openAIConfig?: ConfigurationParameters
 ) => {
   const configuration = new Configuration({
