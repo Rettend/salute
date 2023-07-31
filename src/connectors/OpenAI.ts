@@ -97,7 +97,7 @@ export const createOpenAIChatCompletion = (
         {
           ...options,
           ...rest,
-          // stop: "]",
+          stop: "]",
           messages: prompt.toChatCompletion(),
           top_p: topP || options.top_p,
           max_tokens: maxTokens || options.max_tokens,
