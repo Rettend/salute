@@ -18,6 +18,9 @@ export function printChatElement(element: PromptElement) {
         break;
     }
   }
+  else {
+    console.log(element.content);
+  }
 }
 
 export async function* renderStream(
