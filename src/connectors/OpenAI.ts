@@ -51,12 +51,10 @@ export const createOpenAICompletion = (
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
-      console.log("rest.stop", rest.stop);
       const response = await openAIApi.createCompletion(
         {
           ...options,
           ...rest,
-          // stop: "]",
           prompt: prompt.toString(),
           top_p: topP || options.top_p,
           max_tokens: maxTokens || options.max_tokens,
@@ -94,10 +92,12 @@ export const createOpenAIChatCompletion = (
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
+      console.log("rest.stop", rest.stop);
       const response = await openAIApi.createChatCompletion(
         {
           ...options,
           ...rest,
+          // stop: "]",
           messages: prompt.toChatCompletion(),
           top_p: topP || options.top_p,
           max_tokens: maxTokens || options.max_tokens,
