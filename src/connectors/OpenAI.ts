@@ -79,7 +79,7 @@ export const createOpenAICompletion = (
 };
 
 export const createOpenAIChatCompletion = (
-  options: Omit<CreateChatCompletionRequest, "messages" | "stream">,
+  options: Omit<CreateChatCompletionRequest, "messages" | "stream" | "stop">,
   openAIConfig?: ConfigurationParameters
 ) => {
   const configuration = new Configuration({
@@ -92,12 +92,10 @@ export const createOpenAIChatCompletion = (
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
-      console.log("rest.stop", rest.stop);
       const response = await openAIApi.createChatCompletion(
         {
           ...options,
           ...rest,
-          stop: "]",
           messages: prompt.toChatCompletion(),
           top_p: topP || options.top_p,
           max_tokens: maxTokens || options.max_tokens,
