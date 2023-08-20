@@ -15,6 +15,7 @@ export async function* parseOpenAIStream(
 ): AsyncGenerator<[number, string], void> {
   let content = "";
   for await (const chunk of stream) {
+    console.log("chunk", chunk);
     content += chunk.toString();
     console.log("content", content);
     while (content.indexOf("\n") !== -1) {
@@ -30,6 +31,7 @@ export async function* parseOpenAIStream(
         console.log("choices", json.choices);
         for (const choice of json.choices) {
           if (choice.message?.content) {
+            console.log("choice.message.content", choice.message.content);
             yield [choice.index, choice.message.content];
           }
         }
@@ -123,6 +125,7 @@ export const createOpenAIChatCompletion = (
 
         console.log(stream);
         yield* parseOpenAIStream(stream, true);
+        console.log(stream);
       }
     } catch (error) {
       if (error instanceof OpenAI.APIError) {
