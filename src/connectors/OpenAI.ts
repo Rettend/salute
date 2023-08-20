@@ -72,7 +72,7 @@ export const createOpenAICompletion = (
         }
       } else {
         const stream = response as unknown as NodeJS.ReadableStream;
-        
+
         yield* parseOpenAIStream(stream, false);
       }
     } catch (error) {
@@ -110,13 +110,13 @@ export const createOpenAIChatCompletion = (
       );
 
       if (!props.stream && !(response instanceof Stream)) {
-        console.log("STREAM");
+        console.log("NOT STREAM");
         for (const [i, c] of response.choices.entries()) {
           console.log(`Processing choice ${i}: ${c.message.content}`);
           yield [i, c.message.content || ""];
         }
       } else {
-        console.log("NOT STREAM");
+        console.log("STREAM");
         const stream = response as unknown as NodeJS.ReadableStream;
 
         console.log(stream);
