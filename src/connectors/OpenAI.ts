@@ -18,7 +18,9 @@ export async function* parseOpenAIStream(
 ): AsyncGenerator<[number, string], void> {
   let content = "";
   for await (const chunk of stream) {
+    console.log("chunk", chunk);
     content += chunk.toString();
+    console.log("content", content);
     while (content.indexOf("\n") !== -1) {
       if (content.indexOf("\n") === -1) break;
       const nextRow = content.slice(0, content.indexOf("\n") + 1);
@@ -29,8 +31,10 @@ export async function* parseOpenAIStream(
       const json = JSON.parse(data);
       if (!Array.isArray(json.choices)) break;
       for (const choice of json.choices) {
-        if (choice?.delta?.content)
+        if (choice?.delta?.content) {
+          console.log("text", choice?.delta?.content.toString());
           yield [choice.index, choice?.delta?.content.toString()];
+        }
         if (choice.text) yield [choice.index, choice.text.toString()];
       }
     }
@@ -110,6 +114,7 @@ export const createOpenAIChatCompletion = (
       } else {
         const stream = response.data as unknown as NodeJS.ReadableStream;
         yield* parseOpenAIStream(stream);
+        console.log("stream", stream);
       }
     } catch (e: any) {
       console.log(e);
@@ -121,15 +126,15 @@ export const createOpenAIChatCompletion = (
 
 export const gpt3 = createOpenAIChatCompletion(
   { model: "gpt-3.5-turbo" },
-  { apiKey: process.env.OPENAI_KEY }
+  { apiKey: openAIKey }
 );
 
 export const gpt4 = createOpenAIChatCompletion(
   { model: "gpt-4" },
-  { apiKey: process.env.OPENAI_KEY }
+  { apiKey: openAIKey }
 );
 
 export const davinci = createOpenAICompletion(
   { model: "text-davinci-003" },
-  { apiKey: process.env.OPENAI_KEY }
+  { apiKey: openAIKey }
 );
