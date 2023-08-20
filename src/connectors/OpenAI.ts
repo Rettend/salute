@@ -1,8 +1,6 @@
 import OpenAI, { ClientOptions } from 'openai';
 import { createLLM } from ".";
 import { Stream } from 'openai/streaming';
-import { Completion } from 'openai/resources';
-import { ChatCompletion } from 'openai/resources/chat';
 import { isChatCompletion, isCompletion } from '../helpers';
 
 let openAIKey = '';
