@@ -121,15 +121,15 @@ export const createOpenAIChatCompletion = (
 
 export const gpt3 = createOpenAIChatCompletion(
   { model: "gpt-3.5-turbo" },
-  { apiKey: openAIKey }
+  { apiKey: process.env.OPENAI_KEY }
 );
 
 export const gpt4 = createOpenAIChatCompletion(
   { model: "gpt-4" },
-  { apiKey: openAIKey }
+  { apiKey: process.env.OPENAI_KEY }
 );
 
 export const davinci = createOpenAICompletion(
   { model: "text-davinci-003" },
-  { apiKey: openAIKey }
+  { apiKey: process.env.OPENAI_KEY }
 );
