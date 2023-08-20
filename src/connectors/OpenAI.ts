@@ -26,7 +26,7 @@ export async function* parseOpenAIStream(
       const nextRow = content.slice(0, content.indexOf("\n") + 1);
       content = content.slice(content.indexOf("\n") + 2);
       const data = nextRow.replace("data: ", "");
-
+      console.log("data", data);
       if (data.trim() === "[DONE]") return;
       const json = JSON.parse(data);
       if (!Array.isArray(json.choices)) break;
@@ -108,10 +108,12 @@ export const createOpenAIChatCompletion = (
         { responseType: props.stream ? "stream" : undefined }
       );
       if (!props.stream) {
+        console.log("NOT STREAM");
         for (const [i, c] of response.data.choices.entries()) {
           yield [i, c.message?.content || ""];
         }
       } else {
+        console.log("STREAM");
         const stream = response.data as unknown as NodeJS.ReadableStream;
         yield* parseOpenAIStream(stream);
         console.log("stream", stream);
