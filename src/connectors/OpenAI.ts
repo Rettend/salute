@@ -16,16 +16,18 @@ export async function* parseOpenAIStream(
   let content = "";
   for await (const chunk of stream) {
     content += chunk.toString();
-    console.log(content);
+    console.log("content", content);
     while (content.indexOf("\n") !== -1) {
       if (content.indexOf("\n") === -1) break;
       const nextRow = content.slice(0, content.indexOf("\n") + 1);
       content = content.slice(content.indexOf("\n") + 2);
       const data = nextRow.replace("data: ", "");
+      console.log("data", data);
 
       if (data.trim() === "[DONE]") return;
       const json = JSON.parse(data);
       if (isChat && isChatCompletion(json)) {
+        console.log("choices", json.choices);
         for (const choice of json.choices) {
           if (choice.message?.content) {
             yield [choice.index, choice.message.content];
