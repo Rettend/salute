@@ -16,6 +16,7 @@ export async function* parseOpenAIStream(
   let content = "";
   for await (const chunk of stream) {
     content += chunk.toString();
+    console.log(content);
     while (content.indexOf("\n") !== -1) {
       if (content.indexOf("\n") === -1) break;
       const nextRow = content.slice(0, content.indexOf("\n") + 1);
@@ -112,7 +113,6 @@ export const createOpenAIChatCompletion = (
       if (!options.stream && !(response instanceof Stream)) {
         console.log("NOT STREAM");
         for (const [i, c] of response.choices.entries()) {
-          console.log(`Processing choice ${i}: ${c.message.content}`);
           yield [i, c.message.content || ""];
         }
       } else {
@@ -120,7 +120,7 @@ export const createOpenAIChatCompletion = (
         const stream = response as unknown as NodeJS.ReadableStream;
 
         console.log(stream);
-        yield* parseOpenAIStream(stream, false);
+        yield* parseOpenAIStream(stream, true);
       }
     } catch (error) {
       if (error instanceof OpenAI.APIError) {
