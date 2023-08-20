@@ -2,19 +2,24 @@ import chalk from "chalk";
 import { PromptElement, PromptStorage } from "./PromptStorage";
 
 export function printChatElement(element: PromptElement) {
-  switch (element.source) {
-    case "constant":
-      process.stdout.write(chalk.yellow(element.content));
-      break;
-    case "parameter":
-      process.stdout.write(chalk.bgBlue(element.content));
-      break;
-    case "prompt":
-      process.stdout.write(element.content);
-      break;
-    case "llm":
-      process.stdout.write(chalk.bgGreen(element.content));
-      break;
+  if (typeof process !== 'undefined') {
+    switch (element.source) {
+      case "constant":
+        process.stdout.write(chalk.yellow(element.content));
+        break;
+      case "parameter":
+        process.stdout.write(chalk.bgBlue(element.content));
+        break;
+      case "prompt":
+        process.stdout.write(element.content);
+        break;
+      case "llm":
+        process.stdout.write(chalk.bgGreen(element.content));
+        break;
+    }
+  }
+  else {
+    console.log(element.content);
   }
 }
 
