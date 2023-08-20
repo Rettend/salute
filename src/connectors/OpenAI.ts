@@ -1,11 +1,12 @@
-import {
-  Configuration,
-  ConfigurationParameters,
-  CreateChatCompletionRequest,
-  CreateCompletionRequest,
-  OpenAIApi,
-} from "openai";
+import OpenAI, { ClientOptions } from 'openai';
 import { createLLM } from ".";
+import { Stream } from 'openai/streaming';
+
+let openAIKey = '';
+
+if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
+  openAIKey = process.env.OPENAI_KEY;
+}
 
 let openAIKey = '';
 
@@ -38,20 +39,19 @@ export async function* parseOpenAIStream(
 }
 
 export const createOpenAICompletion = (
-  options: CreateCompletionRequest,
-  openAIConfig?: ConfigurationParameters
+  options: Omit<OpenAI.Completions.CompletionCreateParams, "prompt">,
+  openAIConfig?: ClientOptions
 ) => {
-  const configuration = new Configuration({
+
+  const openai = new OpenAI({
     apiKey: openAIKey || openAIConfig?.apiKey,
     ...openAIConfig,
   });
 
-  const openAIApi = new OpenAIApi(configuration);
-
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
-      const response = await openAIApi.createCompletion(
+      const response = await openai.completions.create(
         {
           ...options,
           ...rest,
@@ -60,61 +60,69 @@ export const createOpenAICompletion = (
           max_tokens: maxTokens || options.max_tokens,
           stream: props.stream || undefined,
         },
-        { responseType: props.stream ? "stream" : undefined }
       );
 
-      if (!props.stream) {
-        for (const [i, c] of response.data.choices.entries()) {
-          yield [i, c.text || ""];
+      if (!props.stream && response instanceof Stream) {
+        for await (const part of response) {
+          for (const [i, choice] of part.choices.entries()) {
+            yield [i, choice.text];
+          }
         }
       } else {
-        const stream = response.data as unknown as NodeJS.ReadableStream;
+        const stream = response as unknown as NodeJS.ReadableStream;
 
         yield* parseOpenAIStream(stream);
       }
-    } catch (e: any) {
-      throw e.response;
+    } catch (error) {
+      if (error instanceof OpenAI.APIError) {
+        console.error(error.status, error.code, error.message);
+      } else {
+        console.log(error);
+      }
     }
   }, false);
 };
 
 export const createOpenAIChatCompletion = (
-  options: Omit<CreateChatCompletionRequest, "messages" | "stream" | "stop">,
-  openAIConfig?: ConfigurationParameters
+  options: Omit<OpenAI.Chat.CompletionCreateParams, "messages">,
+  openAIConfig?: ClientOptions
 ) => {
-  const configuration = new Configuration({
+
+  const openai = new OpenAI({
     apiKey: openAIKey || openAIConfig?.apiKey,
     ...openAIConfig,
   });
 
-  const openAIApi = new OpenAIApi(configuration);
-
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
-      const response = await openAIApi.createChatCompletion(
+      const response = await openai.chat.completions.create(
         {
           ...options,
           ...rest,
           messages: prompt.toChatCompletion(),
           top_p: topP || options.top_p,
-          max_tokens: maxTokens || options.max_tokens,
+          max_tokens: maxTokens || options.max_tokens === null ? maxTokens : options.max_tokens,
           stream: props.stream || undefined,
         },
-        { responseType: props.stream ? "stream" : undefined }
       );
-      if (!props.stream) {
-        for (const [i, c] of response.data.choices.entries()) {
-          yield [i, c.message?.content || ""];
+
+      if (!props.stream && response instanceof Stream) {
+        for await (const part of response) {
+          for (const [i, choice] of part.choices.entries()) {
+            yield [i, choice.delta.content as string];
+          }
         }
       } else {
-        const stream = response.data as unknown as NodeJS.ReadableStream;
+        const stream = response as unknown as NodeJS.ReadableStream;
         yield* parseOpenAIStream(stream);
       }
-    } catch (e: any) {
-      console.log(e);
-      console.log(e.response);
-      throw e.response;
+    } catch (error) {
+      if (error instanceof OpenAI.APIError) {
+        console.error(error.status, error.code, error.message);
+      } else {
+        console.log(error);
+      }
     }
   }, true);
 };
