@@ -124,17 +124,17 @@ export const createOpenAIChatCompletion = (
   }, true);
 };
 
-export const gpt3 = createOpenAIChatCompletion(
+export const gpt3 = (apiKey: string) => createOpenAIChatCompletion(
   { model: "gpt-3.5-turbo" },
-  { apiKey: openAIKey }
+  { apiKey: openAIKey || apiKey }
 );
 
-export const gpt4 = createOpenAIChatCompletion(
+export const gpt4 = (apiKey: string) => createOpenAIChatCompletion(
   { model: "gpt-4" },
-  { apiKey: openAIKey }
+  { apiKey: openAIKey || apiKey }
 );
 
-export const davinci = createOpenAICompletion(
+export const davinci = (apiKey: string) => createOpenAICompletion(
   { model: "text-davinci-003" },
-  { apiKey: openAIKey }
+  { apiKey: openAIKey || apiKey }
 );
