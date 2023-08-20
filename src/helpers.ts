@@ -1,5 +1,7 @@
 import chalk from "chalk";
 import { PromptElement, PromptStorage } from "./PromptStorage";
+import { Completion } from "openai/resources";
+import { ChatCompletion } from "openai/resources/chat";
 
 export function printChatElement(element: PromptElement) {
   if (typeof process !== 'undefined') {
@@ -60,4 +62,17 @@ export function isArrayTemplateStringsArray(
   strings: any | TemplateStringsArray
 ): strings is TemplateStringsArray {
   return Array.isArray((strings as TemplateStringsArray).raw);
+}
+
+
+export function isChatCompletion(
+  completion: ChatCompletion | Completion
+): completion is ChatCompletion {
+  return (completion as ChatCompletion).choices !== undefined;
+}
+
+export function isCompletion(
+  completion: ChatCompletion | Completion
+): completion is Completion {
+  return (completion as Completion).choices !== undefined;
 }

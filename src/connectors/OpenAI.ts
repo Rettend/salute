@@ -3,6 +3,7 @@ import { createLLM } from ".";
 import { Stream } from 'openai/streaming';
 import { Completion } from 'openai/resources';
 import { ChatCompletion } from 'openai/resources/chat';
+import { isChatCompletion, isCompletion } from '../helpers';
 
 let openAIKey = '';
 
@@ -41,18 +42,6 @@ export async function* parseOpenAIStream(
   }
 }
 
-function isChatCompletion(
-  completion: ChatCompletion | Completion
-): completion is ChatCompletion {
-  return (completion as ChatCompletion).choices !== undefined;
-}
-
-function isCompletion(
-  completion: ChatCompletion | Completion
-): completion is Completion {
-  return (completion as Completion).choices !== undefined;
-}
-
 export const createOpenAICompletion = (
   options: Omit<OpenAI.Completions.CompletionCreateParams, "prompt">,
   openAIConfig?: ClientOptions
@@ -83,7 +72,7 @@ export const createOpenAICompletion = (
         }
       } else {
         const stream = response as unknown as NodeJS.ReadableStream;
-
+        
         yield* parseOpenAIStream(stream, false);
       }
     } catch (error) {
@@ -121,12 +110,16 @@ export const createOpenAIChatCompletion = (
       );
 
       if (!props.stream && !(response instanceof Stream)) {
+        console.log("STREAM");
         for (const [i, c] of response.choices.entries()) {
+          console.log(`Processing choice ${i}: ${c.message.content}`);
           yield [i, c.message.content || ""];
         }
       } else {
+        console.log("NOT STREAM");
         const stream = response as unknown as NodeJS.ReadableStream;
 
+        console.log(stream);
         yield* parseOpenAIStream(stream, false);
       }
     } catch (error) {
