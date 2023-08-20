@@ -8,12 +8,6 @@ if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
   openAIKey = process.env.OPENAI_KEY;
 }
 
-let openAIKey = '';
-
-if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
-  openAIKey = process.env.OPENAI_KEY;
-}
-
 export async function* parseOpenAIStream(
   stream: NodeJS.ReadableStream
 ): AsyncGenerator<[number, string], void> {
