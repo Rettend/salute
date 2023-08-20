@@ -96,6 +96,8 @@ export const createOpenAIChatCompletion = (
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
+      console.log("options.stream", options.stream);
+      console.log("props.stream", props.stream);
       const response = await openai.chat.completions.create(
         {
           ...options,
@@ -103,11 +105,11 @@ export const createOpenAIChatCompletion = (
           messages: prompt.toChatCompletion(),
           top_p: topP || options.top_p,
           max_tokens: maxTokens || options.max_tokens === null ? maxTokens : options.max_tokens,
-          stream: props.stream || undefined,
+          stream: options.stream,
         },
       );
 
-      if (!props.stream && !(response instanceof Stream)) {
+      if (!options.stream && !(response instanceof Stream)) {
         console.log("NOT STREAM");
         for (const [i, c] of response.choices.entries()) {
           console.log(`Processing choice ${i}: ${c.message.content}`);
