@@ -1,4 +1,4 @@
-import { CreateChatCompletionRequestMessage } from "openai/resources/chat";
+import { ChatCompletionRequestMessage } from "openai";
 
 export type PromptSources = "llm" | "parameter" | "constant" | "prompt";
 
@@ -47,7 +47,7 @@ export class PromptStorage extends Array<Message> {
   }
 
   toChatCompletion() {
-    const messages: CreateChatCompletionRequestMessage[] = [];
+    const messages: ChatCompletionRequestMessage[] = [];
     for (const rolePrompt of this) {
       rolePrompt.forEach((promptElement, i) => {
         if (promptElement.role === "none")
