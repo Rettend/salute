@@ -2,6 +2,8 @@ import OpenAI, { ClientOptions } from 'openai';
 import { createLLM } from ".";
 import { Stream } from 'openai/streaming';
 import { isChatCompletion, isCompletion } from '../helpers';
+import { ChatCompletionChunk } from 'openai/resources/chat';
+import { Completion } from 'openai/resources';
 
 let openAIKey = '';
 
@@ -10,13 +12,13 @@ if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
 }
 
 export async function* parseOpenAIStream(
-  stream: NodeJS.ReadableStream,
+  stream: Stream<ChatCompletionChunk> | Stream<Completion>,
   isChat: boolean
 ): AsyncGenerator<[number, string], void> {
   let content = "";
   for await (const chunk of stream) {
     console.log("chunk", chunk);
-    content += chunk.toString();
+    content += chunk.choices
     console.log("content", content);
     while (content.indexOf("\n") !== -1) {
       if (content.indexOf("\n") === -1) break;
@@ -30,9 +32,9 @@ export async function* parseOpenAIStream(
       if (isChat && isChatCompletion(json)) {
         console.log("choices", json.choices);
         for (const choice of json.choices) {
-          if (choice.message?.content) {
-            console.log("choice.message.content", choice.message.content);
-            yield [choice.index, choice.message.content];
+          if (choice.delta?.content) {
+            console.log("choice.delta.content", choice.delta.content);
+            yield [choice.index, choice.delta.content];
           }
         }
       } else if (!isChat && isCompletion(json)) {
@@ -70,13 +72,18 @@ export const createOpenAICompletion = (
       );
 
       if (!props.stream && !(response instanceof Stream)) {
+        console.log("NOT STREAM");
         for (const [i, c] of response.choices.entries()) {
           yield [i, c.text || ""];
         }
-      } else {
-        const stream = response as unknown as NodeJS.ReadableStream;
+      } else if (response instanceof Stream) {
+        console.log("STREAM", response);
 
-        yield* parseOpenAIStream(stream, false);
+        for await (const part of response) {
+          for (const [i, c] of part.choices.entries()) {
+            yield [i, c.text || ""];
+          }
+        }
       }
     } catch (error) {
       if (error instanceof OpenAI.APIError) {
@@ -119,13 +126,14 @@ export const createOpenAIChatCompletion = (
         for (const [i, c] of response.choices.entries()) {
           yield [i, c.message.content || ""];
         }
-      } else {
-        console.log("STREAM");
-        const stream = response as unknown as NodeJS.ReadableStream;
+      } else if (response instanceof Stream) {  
+        console.log("STREAM", response);
 
-        console.log(stream);
-        yield* parseOpenAIStream(stream, true);
-        console.log(stream);
+        for await (const part of response) {
+          for (const [i, c] of part.choices.entries()) {
+            yield [i, c.delta.content || ""];
+          }
+        }
       }
     } catch (error) {
       if (error instanceof OpenAI.APIError) {

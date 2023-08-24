@@ -1,7 +1,8 @@
 import chalk from "chalk";
+import OpenAI from "openai";
 import { PromptElement, PromptStorage } from "./PromptStorage";
+import { ChatCompletionChunk } from "openai/resources/chat";
 import { Completion } from "openai/resources";
-import { ChatCompletion } from "openai/resources/chat";
 
 export function printChatElement(element: PromptElement) {
   if (typeof process !== 'undefined') {
@@ -66,13 +67,13 @@ export function isArrayTemplateStringsArray(
 
 
 export function isChatCompletion(
-  completion: ChatCompletion | Completion
-): completion is ChatCompletion {
-  return (completion as ChatCompletion).choices !== undefined;
+  completion: ChatCompletionChunk
+): completion is OpenAI.Chat.Completions.ChatCompletionChunk {
+  return completion.choices !== undefined;
 }
 
 export function isCompletion(
-  completion: ChatCompletion | Completion
-): completion is Completion {
-  return (completion as Completion).choices !== undefined;
+  completion: Completion
+): completion is OpenAI.Completions.Completion {
+  return completion.choices !== undefined;
 }

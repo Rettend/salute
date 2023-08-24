@@ -37,7 +37,7 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "eventemitter3": "^5.0.1",
-    "openai": "^4.0.1",
+    "openai": "^4.2.0",
     "ts-deepmerge": "^6.0.3"
   },
   "devDependencies": {
