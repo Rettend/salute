@@ -2,6 +2,9 @@
   "name": "salutejs",
   "version": "0.0.9",
   "description": "Node.js library for the OpenAI API",
+  "author": "Levan Kvirkvelia",
+  "packageManager": "pnpm@8.6.3",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LevanKvirkvelia/salute.git"
@@ -13,22 +16,23 @@
     "gpt-3",
     "gpt3"
   ],
-  "author": "Levan Kvirkvelia",
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.mjs",
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/index.mjs",
       "import": {
         "default": "./dist/index.mjs"
       },
-      "default": "./dist/index.js",
-      "require": "./dist/index.mjs"
+      "default": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "tsup src/index.ts  --sourcemap --dts --format esm,cjs",
     "prepublishOnly": "pnpm run build",
@@ -48,8 +52,5 @@
   },
   "directories": {
     "example": "examples"
-  },
-  "files": [
-    "dist/*"
-  ]
+  }
 }

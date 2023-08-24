@@ -1,21 +1,18 @@
 export {
   createOpenAIChatCompletion,
   createOpenAICompletion,
-  davinci,
-  gpt3,
-  gpt4,
-} from "./connectors/OpenAI";
+} from './connectors/OpenAI'
 
 export {
   llm,
-  createLLM
-} from "./connectors";
+  createLLM,
+} from './connectors'
 export type {
   AnyObject,
   Agent,
-  LLMCompletionFn
-} from "./connectors";
-export { renderStream } from "./helpers";
+  LLMCompletionFn,
+} from './connectors'
+export { renderStream } from './helpers'
 export {
   system,
   user,
@@ -25,16 +22,16 @@ export {
   loop,
   map,
   wait,
-  block
-} from "./actions/actions";
+  block,
+} from './actions/actions'
 export type {
   RoleTemplateFunction,
   RoleAction,
-  GenOptions
-} from "./actions/actions";
+  GenOptions,
+} from './actions/actions'
 export {
   createAction,
   runTemplateActions,
   runActions,
   createNewContext,
-} from "./actions/primitives";
+} from './actions/primitives'

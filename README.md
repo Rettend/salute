@@ -55,10 +55,10 @@ This page will give you an introduction to the 80% of Salute concepts and featur
 
 
 ```ts
-import { gpt3, gen, assistant, system, user } from "salutejs";
+import { assistant, gen, gpt3, system, user } from 'salutejs'
 
 const agent = gpt3(
-  ({ params })=>[
+  ({ params }) => [
     system`You are a helpful and terse assistant.`,
     user`
       I want a response to the following question: 
@@ -66,16 +66,16 @@ const agent = gpt3(
       
       Please answer the question as if experts had collaborated in writing an anonymous answer.
     `,
-    assistant`${gen("answer")}`,
+    assistant`${gen('answer')}`,
   ]
-);
+)
 
 const result = await agent(
-  { query: `How can I be more productive?` },
+  { query: 'How can I be more productive?' },
   { render: true } // render=true will render the chat sequence in the console
-);
+)
 
-console.log(result);
+console.log(result)
 /*
 {
   answer: "You can be more productive by...",
@@ -88,10 +88,10 @@ console.log(result);
 To improve the model's performance, let's add another two steps to the chat sequence. The `gen` function saves the output as part of the prompt for the next `gen` function, making it easy to create chat sequences with minimal boilerplate. 
 
 ```ts
-import { gpt3, gen, assistant, system, user } from "salutejs";
+import { assistant, gen, gpt3, system, user } from 'salutejs'
 
 const agent = gpt3(
-  ({ params })=>[
+  ({ params }) => [
     system`You are a helpful and terse assistant.`,
     user`
       I want a response to the following question: 
@@ -99,22 +99,22 @@ const agent = gpt3(
       Don't answer the question yet.
       Name 3 world-class experts (past or present) who would be great at answering this?
     `,
-    assistant`${gen("expertNames")}`,
+    assistant`${gen('expertNames')}`,
     user`
       Great, now please answer the question as if these experts had collaborated in writing a joint anonymous answer.
     `,
-    assistant`${gen("answer")}`,
+    assistant`${gen('answer')}`,
     user`Are you sure you gave a good answer? Write the answer again and fix it if necessary.`,
-    assistant`${gen("fixedAnswer")}`,
+    assistant`${gen('fixedAnswer')}`,
   ]
-);
+)
 
 const result = await agent(
-  { query: `How can I be more productive?` },
+  { query: 'How can I be more productive?' },
   { render: true }
-);
+)
 
-console.log(result);
+console.log(result)
 /*
 {
   expertNames: "Elon Musk, Bill Gates, and Jeff Bezos...",
@@ -130,21 +130,21 @@ console.log(result);
 Salute components are similar to React components. They are functions returning Salute primitives, such as actions (e.g. `gen`, `system`, `user`, `assistant`), AsyncGenerators, strings, or arrays and promises of these. The function will be called when sequence reaches it, so you can use the current outputs in the function. 
 
 ```ts
-import { gpt3, gen, assistant, system, user } from "salutejs";
-import { db } from "a-random-sql-library";
+import { assistant, gen, gpt3, system, user } from 'salutejs'
+import { db } from 'a-random-sql-library'
 
 // example of a component
-async function fetchTableSchemaAsAString(){
-  const listOfTables = await db.tables();
-  return listOfTables.map(table=>`Table ${table.name} has columns ${table.columns.join(", ")}`).join("\n");
+async function fetchTableSchemaAsAString() {
+  const listOfTables = await db.tables()
+  return listOfTables.map(table => `Table ${table.name} has columns ${table.columns.join(', ')}`).join('\n')
 }
 
-async function runSQL({outputs}){ 
+async function runSQL({ outputs }) {
   return JSON.stringify(await db.run(outputs.sqlQuery))
 }
 
 const agent = gpt3(
-  ({ params })=>[
+  ({ params }) => [
     system`You are a helpful assistant that answers questions by writing SQL queries.`,
     user`
       Here is my question: ${params.query}
@@ -160,26 +160,26 @@ const agent = gpt3(
       Generate a Clickhouse SQL query that answers the question above.
       Return only SQL query, no other text. 
     `,
-    assistant`${gen("sqlQuery")}`,
+    assistant`${gen('sqlQuery')}`,
     user`
       Here is the result of your query:
       -----
-      ${async ({outputs})=>{ 
+      ${async ({ outputs }) => {
         return JSON.stringify(await db.run(outputs.sqlQuery))
       }}
       -----
       Please convert the result to a text answer, so that it is easy to understand.
     `,
-    assistant`${gen("answer")}`,
+    assistant`${gen('answer')}`,
   ]
-);
+)
 
 const result = await agent(
-  { query: `How many users are there in the database?` },
+  { query: 'How many users are there in the database?' },
   { render: true } // render=true will render the chat sequence in the console
-);
+)
 
-console.log(result);
+console.log(result)
 ```
 
 ### Array.map for Chat Sequences
@@ -187,16 +187,16 @@ console.log(result);
 Salute natively supports Arrays, so you can dynamically generate chat sequences. If `gen` is used inside an array, the output will be an array of generated values.
 
 ```ts
-import { gpt3, assistant, system, user, gen } from "salutejs";
+import { assistant, gen, gpt3, system, user } from 'salutejs'
 
-const AI_NAME = "Midjourney";
+const AI_NAME = 'Midjourney'
 
 const QUESTIONS = [
-  `Main elements with specific imagery details`,
-  `Next, describe the environment`,
-  `Now, provide the mood / feelings and atmosphere of the scene`,
-  `Finally, describe the photography style (Photo, Portrait, Landscape, Fisheye, Macro) along with camera model and settings`,
-];
+  'Main elements with specific imagery details',
+  'Next, describe the environment',
+  'Now, provide the mood / feelings and atmosphere of the scene',
+  'Finally, describe the photography style (Photo, Portrait, Landscape, Fisheye, Macro) along with camera model and settings',
+]
 
 const agent = gpt3(({ params }) => [
   system`
@@ -209,18 +209,18 @@ const agent = gpt3(({ params }) => [
     The answer should be one sentence long, starting directly with the description.
   `,
 
-  QUESTIONS.map((item) => [
-    user`${item}`, 
-    assistant`${gen("answer")}`
+  QUESTIONS.map(item => [
+    user`${item}`,
+    assistant`${gen('answer')}`
   ]),
-]);
+])
 
 const result = await agent(
-  { query: `A picture of a dog` },
+  { query: 'A picture of a dog' },
   { render: true }
-);
+)
 
-console.log(result);
+console.log(result)
 /*
 {
   answer: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"]
@@ -232,16 +232,16 @@ console.log(result);
 Alternatively, you can use `map` function to get an array of objects.
 
 ```ts
-import { gpt3, assistant, system, user, gen, map } from "salutejs";
+import { assistant, gen, gpt3, map, system, user } from 'salutejs'
 
-const AI_NAME = "Midjourney";
+const AI_NAME = 'Midjourney'
 
 const QUESTIONS = [
-  `Main elements with specific imagery details`,
-  `Next, describe the environment`,
-  `Now, provide the mood / feelings and atmosphere of the scene`,
-  `Finally, describe the photography style (Photo, Portrait, Landscape, Fisheye, Macro) along with camera model and settings`,
-];
+  'Main elements with specific imagery details',
+  'Next, describe the environment',
+  'Now, provide the mood / feelings and atmosphere of the scene',
+  'Finally, describe the photography style (Photo, Portrait, Landscape, Fisheye, Macro) along with camera model and settings',
+]
 
 const agent = gpt3(({ params }) => [
   system`
@@ -253,18 +253,18 @@ const agent = gpt3(({ params }) => [
     Generate descriptions about my query, in realistic photographic style, for an Instagram post. 
     The answer should be one sentence long, starting directly with the description.
   `,
-  map('items', QUESTIONS.map((item) => [
-    user`${item}`, 
-    assistant`${gen("answer")}`
+  map('items', QUESTIONS.map(item => [
+    user`${item}`,
+    assistant`${gen('answer')}`
   ])),
-]);
+])
 
 const result = await agent(
-  { query: `A picture of a dog` },
+  { query: 'A picture of a dog' },
   { render: true }
-);
+)
 
-console.log(result);
+console.log(result)
 /*
 {
   items: [
@@ -282,20 +282,20 @@ Here is an example of getting the LLM to generate inference while perfectly main
 
 ```ts
 const jsonAgent = davinci(
-    ({ ai, gen }) => ai`
+  ({ ai, gen }) => ai`
     The following is a character profile for an RPG game in JSON format.
 
     json
     {
-        "description": "${gen("description")}",
-        "name": "${gen("name", '"')}",
-        "age": ${gen("age", ",")},
-        "class": "${gen("class", '"')}",
-        "mantra": "${gen("mantra", '"')}",
-        "strength": ${gen("strength", ",")},
-        "items": [${[0, 0, 0].map(() => ai`"${gen("item", '"')}",`)}]
+        "description": "${gen('description')}",
+        "name": "${gen('name', '"')}",
+        "age": ${gen('age', ',')},
+        "class": "${gen('class', '"')}",
+        "mantra": "${gen('mantra', '"')}",
+        "strength": ${gen('strength', ',')},
+        "items": [${[0, 0, 0].map(() => ai`"${gen('item', '"')}",`)}]
     }`
-  );
+)
 ```
 ![json](https://github.com/LevanKvirkvelia/salute/assets/5202843/5af5a75e-eec3-4ec6-b341-8eeea275f595)
 
@@ -317,7 +317,7 @@ const agent = gpt4(
           Can you please generate one option for how to accomplish this?
           Please make the option very short, at most one line.
         `,
-        assistant`${gen("option", { temperature: 1, maxTokens: 500, n: 5 })}`,
+        assistant`${gen('option', { temperature: 1, maxTokens: 500, n: 5 })}`,
       ],
       { hidden: () => outputs.option?.length > 0 }
     ),
@@ -327,11 +327,11 @@ const agent = gpt4(
           Can you please comment on the pros and cons of each of the following options, and then pick the best option?
           ---
           ${({ outputs }) =>
-            outputs.option.map((o, i) => `Option ${i}: ${o}`).join("\n")}
+            outputs.option.map((o, i) => `Option ${i}: ${o}`).join('\n')}
           ---
           Please discuss each option very briefly (one line for pros, one for cons), and end by saying Best=X, where X is the best option.
         `,
-        assistant`${gen("prosandcons", { temperature: 0, maxTokens: 500 })}`,
+        assistant`${gen('prosandcons', { temperature: 0, maxTokens: 500 })}`,
       ],
       { hidden: () => !!outputs.prosandcons }
     ),
@@ -341,14 +341,14 @@ const agent = gpt4(
         outputs.option[+(outputs.prosandcons.match(/Best=(\d+)/)?.[1] || 0)]}
       Please elaborate on this plan, and tell me how to best accomplish it.
     `,
-    assistant`${gen("plan", { maxTokens: 500 })}`,
+    assistant`${gen('plan', { maxTokens: 500 })}`,
   ],
   { stream: true }
-);
+)
 
-const result = await agent({ goal: "read more books" }, { render: true });
+const result = await agent({ goal: 'read more books' }, { render: true })
 
-console.log(result);
+console.log(result)
 ```
 ![blocks advanced](https://github.com/LevanKvirkvelia/salute/assets/5202843/95ec6ca9-9272-43c5-8c78-499361060898)
 
@@ -367,24 +367,24 @@ const agent = gpt3(({ params }) => [
   At every step, I will provide you with the user input, as well as a comment reminding you of your instructions. 
   Never talk about the fact that you are an AI, even if the user asks you. Always answer as ${params.role}.`,
   assistant`Ok, I will follow these instructions.`,
-  loop("inputs", [
-    user`${wait("question", true)}`, //
-    assistant`${gen("answer")}`,
+  loop('inputs', [
+    user`${wait('question', true)}`, //
+    assistant`${gen('answer')}`,
   ]),
-]);
+])
 
-const democrat = agent({ role: "democrat" });
-const republican = agent({ role: "republican" }, { render: true });
+const democrat = agent({ role: 'democrat' })
+const republican = agent({ role: 'republican' }, { render: true })
 
-let question = "What is your opinion on the topic of abortion?";
+let question = 'What is your opinion on the topic of abortion?'
 
 for (let i = 0; i < 2; i++) {
-  republican.input("question", question);
-  democrat.input("question", await republican.next()!);
-  question = await democrat.next();
+  republican.input('question', question)
+  democrat.input('question', await republican.next()!)
+  question = await democrat.next()
 }
 
-console.log(republican.outputs);
+console.log(republican.outputs)
 /*
 {
   inputs: [
@@ -397,7 +397,7 @@ console.log(republican.outputs);
       answer: "I understand your perspective, but as a Republican, I firmly believe in protecting the sanctity of life, from conception to natural death. While providing access to safe and legal abortion services is important, it should not come at the expense of unborn babies' lives. Instead, we should focus on promoting adoption and improving access to resources and education to prevent unplanned pregnancies in the first place. Ultimately, we must work together to find common ground and reduce the need for abortion while protecting innocent life."
     }
   ]
-}*/
+} */
 ```
 
 ### Using TypeScript
@@ -414,23 +414,23 @@ const proverbAgent = davinci<
     - ${params.book} ${params.chapter}:${params.verse}
 
     UPDATED
-    Where there is no guidance${gen("rewrite", { temperature: 0 })}
-    - GPT ${gen("chapter", { temperature: 0 })}:${gen("verse")}
+    Where there is no guidance${gen('rewrite', { temperature: 0 })}
+    - GPT ${gen('chapter', { temperature: 0 })}:${gen('verse')}
   `
-);
+)
 
 const result = await proverbAgent(
   {
     proverb:
-      "Where there is no guidance, a people falls,\nbut in an abundance of counselors there is safety.",
-    book: "Proverbs",
+      'Where there is no guidance, a people falls,\nbut in an abundance of counselors there is safety.',
+    book: 'Proverbs',
     chapter: 11,
     verse: 14,
   },
   { render: true }
-);
+)
 
-console.log(result);
+console.log(result)
 ```
 
 ## Config
@@ -442,20 +442,20 @@ The library is primarily designed to work with `openai` models but it is fully b
 ```ts
 // Use createChatGPT to create chat completions
 const gpt4 = createOpenAIChatCompletion({
-    model: "gpt-4",
-    temperature : 0.9,
-    // stream: true is always set (for now)
+  model: 'gpt-4',
+  temperature: 0.9,
+  // stream: true is always set (for now)
 }, {
-    apiKey: "",
-    // Full openai config object
+  apiKey: '',
+  // Full openai config object
 })
 
 const davinci = createOpenAICompletion({
-    model: "text-davinci-003",
-    temperature : 0.9,
-    // stream: true is always set (for now)
+  model: 'text-davinci-003',
+  temperature: 0.9,
+  // stream: true is always set (for now)
 }, {
-    apiKey: "",
-    // Full openai config object
+  apiKey: '',
+  // Full openai config object
 })
 ```
