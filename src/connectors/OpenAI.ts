@@ -1,50 +1,11 @@
 import OpenAI, { ClientOptions } from 'openai';
 import { createLLM } from ".";
 import { Stream } from 'openai/streaming';
-import { isChatCompletion, isCompletion } from '../helpers';
-import { ChatCompletionChunk } from 'openai/resources/chat';
-import { Completion } from 'openai/resources';
 
 let openAIKey = '';
 
 if (typeof process !== 'undefined' && process.env.OPENAI_KEY) {
   openAIKey = process.env.OPENAI_KEY;
-}
-
-export async function* parseOpenAIStream(
-  stream: Stream<ChatCompletionChunk> | Stream<Completion>,
-  isChat: boolean
-): AsyncGenerator<[number, string], void> {
-  let content = "";
-  for await (const chunk of stream) {
-    console.log("chunk", chunk);
-    content += chunk.choices
-    console.log("content", content);
-    while (content.indexOf("\n") !== -1) {
-      if (content.indexOf("\n") === -1) break;
-      const nextRow = content.slice(0, content.indexOf("\n") + 1);
-      content = content.slice(content.indexOf("\n") + 2);
-      const data = nextRow.replace("data: ", "");
-      console.log("data", data);
-
-      if (data.trim() === "[DONE]") return;
-      const json = JSON.parse(data);
-      if (isChat && isChatCompletion(json)) {
-        console.log("choices", json.choices);
-        for (const choice of json.choices) {
-          if (choice.delta?.content) {
-            console.log("choice.delta.content", choice.delta.content);
-            yield [choice.index, choice.delta.content];
-          }
-        }
-      } else if (!isChat && isCompletion(json)) {
-        const choice = json.choices[0];
-        if (choice.text) {
-          yield [choice.index, choice.text];
-        }
-      }
-    }
-  }
 }
 
 export const createOpenAICompletion = (
@@ -105,7 +66,9 @@ export const createOpenAIChatCompletion = (
     ...openAIConfig,
   });
 
-  return createLLM(async function* ({ prompt, ...props }) {
+  let stream = "";
+
+  const llm = createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props;
       console.log("options.stream", options.stream);
@@ -124,6 +87,7 @@ export const createOpenAIChatCompletion = (
       if (!options.stream && !(response instanceof Stream)) {
         console.log("NOT STREAM");
         for (const [i, c] of response.choices.entries()) {
+          stream += c.message.content || "";
           yield [i, c.message.content || ""];
         }
       } else if (response instanceof Stream) {  
@@ -131,6 +95,7 @@ export const createOpenAIChatCompletion = (
 
         for await (const part of response) {
           for (const [i, c] of part.choices.entries()) {
+            stream += c.delta.content || "";
             yield [i, c.delta.content || ""];
           }
         }
@@ -143,6 +108,8 @@ export const createOpenAIChatCompletion = (
       }
     }
   }, true);
+
+  return { llm, stream };
 };
 
 export const gpt3 = createOpenAIChatCompletion(
