@@ -59,6 +59,8 @@ export function createOpenAIChatCompletion(options: Omit<OpenAI.Chat.CompletionC
     ...openAIConfig,
   })
 
+  let step = 0
+
   return createLLM(async function* ({ prompt, ...props }) {
     try {
       const { maxTokens, topP, stopRegex, llm, ...rest } = props
@@ -77,8 +79,22 @@ export function createOpenAIChatCompletion(options: Omit<OpenAI.Chat.CompletionC
       if (!options.stream && !(response instanceof Stream)) {
         console.log('NOT STREAM')
         for (const [i, c] of response.choices.entries()) {
-          storage.value.translation += c.message.content || ''
+          if (step === 0) {
+            storage.value.definition += c.message.content || ''
+          }
+          else if (step === 1) {
+            storage.value.translation += c.message.content || ''
+          }
+          else if (step === 2) {
+            storage.value.definitionTranslated += c.message.content || ''
+          }
+          else if (step === 3) {
+            // sentencesStorage.value.push({
+            //   sentence: c.message.content || '',
+            // })
+          }
           yield [i, c.message.content || '']
+          step += 1
         }
       }
       else if (response instanceof Stream) {
@@ -86,8 +102,23 @@ export function createOpenAIChatCompletion(options: Omit<OpenAI.Chat.CompletionC
 
         for await (const part of response) {
           for (const [i, c] of part.choices.entries()) {
-            storage.value.translation += c.delta.content || ''
+            if (step === 0) {
+              storage.value.definition += c.delta.content || ''
+            }
+            else if (step === 1) {
+              storage.value.definition += c.delta.content || ''
+            }
+            else if (step === 2) {
+              storage.value.definitionTranslated += c.delta.content || ''
+            }
+            else if (step === 3) {
+              // sentencesStorage.value.push({
+              //   sentence: c.message.content || '',
+              // })
+            }
+
             yield [i, c.delta.content || '']
+            step += 1
           }
         }
       }
